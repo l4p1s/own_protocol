@@ -8,31 +8,44 @@ typedef struct {
 } packet_header;
 
 int main(int argc, char *argv[]) {
-    // 引数の数をチェックする
-    if (argc != 1) {
-        printf("Usage: %s <message_id> <message>\n", argv[0]);
-        return 1;
+
+    if(argc < 2){
+        printf("Usage: %s <message> \n", argv[0]);
+        exit(1);
     }
 
-    // メモリを割り当てる
+    // メモリの割り当て
     char *p = malloc(1024);
     if (p == NULL) {
         printf("メモリの割り当てに失敗しました。\n");
         return 1;
     }
 
-    // packet_header 構造体へのポインタを作成する
-    packet_header *ph = p;
+    // packet_header 構造体へのポインタを作成
+    packet_header *ph = (packet_header*) p;
 
-    // メッセージIDを設定する
-    ph->message_id = 1 // 第1引数からメッセージIDを取得
+   
+    ph->message_id = 1; 
+    ph->length = strlen(argv[0]);
 
-    // メッセージの長さを設定する
-    ph->length = strlen(argv[1]);   // 第2引数の文字列の長さを取得
+    // 残りの領域に、メッセージを入れる
+    // phは構造体型なので、charにキャスト
+    // そのあとに、構造体分の大きさをインクリメントする
+    char *q = ((char*)ph + sizeof(packet_header));
 
-    // メッセージIDを表示する
+    char *r = q;
+
+    // インクリメントしたポインタpにargv[0]をコピーする
+    strcpy(q , argv[0]);
+
+    // 次のメッセージを入れるために、ポインタをインクリメントする
+    q += strlen(argv[0]);
+
+    strcpy(q , argv[1]);
+
     printf("Message ID: %u\n", ph->message_id);
     printf("Message Length: %u\n", ph->length);
+    printf("%s", r);
 
     // メモリを解放する
     free(p);
