@@ -15,6 +15,12 @@ int main(int argc , char *argv[]){
     struct sockaddr_in serv_addr;
     struct hostent *server;
 
+    typedef struct {
+    uint message_id;  // 16bit
+    uint length;      // 16bit
+} packet_header;
+
+
     /* gethostbynemaeの返却値の構造体は以下の構造
     struct hostent {
 	   char  *h_name;             ホストの正式名称 
@@ -24,10 +30,9 @@ int main(int argc , char *argv[]){
 	   char  **h_addr_list;       NULL で終わるアドレスのリスト
     };
 */
-    char buffer[256];
 
-    if (argc < 3) {
-        fprintf(stderr, "usage %s hostname message\n", argv[0]);
+    if (argc < 2) {
+        fprintf(stderr, "usage %s <message>\n", argv[0]);
         exit(0);
     }
 
@@ -37,7 +42,7 @@ int main(int argc , char *argv[]){
         printf("ERROR opening socket");
         exit(1);
     }
-
+    strcpy(argv[1],"133.92.147.249");
     server = gethostbyname(argv[1]);
     if (server == NULL) {
         fprintf(stderr, "ERROR, no such host\n");
@@ -59,15 +64,34 @@ if (connect(socket_fd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
 
 
 // データを送信する
-    memset(buffer, 0, 256);
-    strcpy(buffer, argv[2]);
-    n = send(socket_fd, buffer, strlen(buffer), 0);
+    // メモリの割り当て
+    char *p = malloc(1024);
+    if (p == NULL) {
+        printf("メモリの割り当てに失敗しました。\n");
+        return 1;
+    }
+
+    // packet_header 構造体へのポインタを作成
+    packet_header *ph = (packet_header*) p;
+
+   
+    ph->message_id = 1; 
+    ph->length = strlen(argv[0]);
+
+    // 残りの領域に、メッセージを入れる
+    // phは構造体型なので、charにキャスト
+    // そのあとに、構造体分の大きさをインクリメントする
+    char *q = ((char*)ph + sizeof(packet_header));
+
+    strcpy(q ,argv[2]);
+    n = send(socket_fd, ph, sizeof(ph), 0);
     if (n < 0) {
         printf("ERROR writing to socket");
         exit(1);
     }
 
 // データを受信する
+    char buffer[256];
     memset(buffer , 0 , 255);
     n = recv(socket_fd , buffer , 255 , 0);
     if (n < 0) {
