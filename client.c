@@ -42,8 +42,7 @@ int main(int argc , char *argv[]){
         printf("ERROR opening socket");
         exit(1);
     }
-    strcpy(argv[1],"133.92.147.249");
-    server = gethostbyname(argv[1]);
+    server = gethostbyname("133.92.147.249");
     if (server == NULL) {
         fprintf(stderr, "ERROR, no such host\n");
         exit(0);
@@ -84,7 +83,7 @@ if (connect(socket_fd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
     char *q = ((char*)ph + sizeof(packet_header));
 
     strcpy(q ,argv[2]);
-    n = send(socket_fd, &ph, sizeof(ph), 0);
+    n = send(socket_fd, &ph, 1024, 0);
     if (n < 0) {
         printf("ERROR writing to socket");
         exit(1);

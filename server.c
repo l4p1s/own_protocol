@@ -13,6 +13,11 @@ int main(){
     socklen_t  clilen;
     char buffer[256];
 
+    typedef struct {
+    uint message_id;  // 16bit
+    uint length;      // 16bit
+} packet_header;
+
     // sockaddr_inという、構造体が提供されてる。
     /* /usr/include/netinet/in.h:
    struct in_addr {
@@ -75,8 +80,10 @@ recv_socket_fd = accept(socket_fd, (struct sockaddr *)&cli_addr, &clilen);
 
 /* accept()を実行すると、クライアントから通信接続要求が来るまでプログラムを停止し、接続後にプログラムを再開*/
 
-memset(buffer , 0 , 256);
-n = recv(recv_socket_fd , buffer , 255 , 0);
+char *p = NULL;
+p = malloc(1024);
+
+n = recv(recv_socket_fd , p , 1024, 0);
 
 // 第四引数は、受信オプションを指定します。0を指定すると、通常の受信になります。
 
@@ -85,17 +92,25 @@ if (n < 0) {
         exit(1);
     }
 
-printf("Message from client: %s\n", buffer);
+packet_header *ph = (packet_header*) p;
 
-// データを送信する
-    n = send(recv_socket_fd, "I got your message", 18, 0);
-    if (n < 0) {
-        printf("ERROR writing to socket");
-        exit(1);
-    }
+printf("Message_ID from client: %u\n", ph->message_id);
+printf("Message length from client: %u\n", ph->length);
 
-    close(recv_socket_fd);
-    close(socket_fd);
+char *q = ((char*)ph + sizeof(packet_header));
+
+printf("%s", q);
+
+
+// // データを送信する
+//     n = send(recv_socket_fd, q, 1024, 0);
+//     if (n < 0) {
+//         printf("ERROR writing to socket");
+//         exit(1);
+//     }
+
+//     close(recv_socket_fd);
+//     close(socket_fd);
 
     return 0;
 }
