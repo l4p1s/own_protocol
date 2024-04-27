@@ -5,6 +5,7 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include "type_h.h"
 
 #define PORT 8000
 
@@ -12,12 +13,6 @@ int main(){
     int socket_fd , recv_socket_fd;
     socklen_t  clilen;
     char buffer[256];
-
-    typedef struct {
-    uint message_id;  // 16bit
-    uint length;      // 16bit
-} packet_header;
-
     // sockaddr_inという、構造体が提供されてる。
     /* /usr/include/netinet/in.h:
    struct in_addr {
@@ -99,11 +94,19 @@ packet_header *ph = (packet_header*) p;
 
 printf("Message_ID from client: %u\n", ph->message_id);
 printf("Message length from client: %u\n", ph->length);
-
+printf("Message num from client: %u\n", ph->message_num);
+printf("Message type from client: %s\n", ph->message_type);
 char *q = ((char*)ph + sizeof(packet_header));
 
-printf("%s\n", q);
-
+if(strcmp(ph->message_type ,Hide) == 0){
+    for(int i ; i < ph->length ; i++){
+        print("hide message\n")
+        printf("*");
+    }
+    printf("\n");
+}else{
+    printf("message  :  %s\n", q);
+}
 
 // // データを送信する
 //     n = send(recv_socket_fd, q, 1024, 0);

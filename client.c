@@ -6,6 +6,7 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include "type_h.h"
 
 #define PORT 8000
 
@@ -14,12 +15,6 @@ int main(int argc , char *argv[]){
     int socket_fd , n;
     struct sockaddr_in serv_addr;
     struct hostent *server;
-
-    typedef struct {
-    uint message_id;  // 16bit
-    uint length;      // 16bit
-} packet_header;
-
 
     /* gethostbynemaeの返却値の構造体は以下の構造
     struct hostent {
@@ -32,7 +27,7 @@ int main(int argc , char *argv[]){
 */
 
     if (argc < 2) {
-        fprintf(stderr, "usage %s <message>\n", argv[0]);
+        fprintf(stderr, "usage %s <-option> <message>\n", argv[0]);
         exit(0);
     }
 
@@ -72,34 +67,47 @@ if (connect(socket_fd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
 
     // packet_header 構造体へのポインタを作成
     packet_header *ph = (packet_header*) p;
-
    
-    ph->message_id = 1; 
-    ph->length = strlen(argv[1]);
+    ph->message_id = 1;
+    
+    int total_length =0;
+    // 送るメッセージすべての長さ
+    for(int i=2 ; i < argc ; i++){
+        total_length+=strlen(argv[i]);
+    }
+    ph->length = total_length;
+    // 送るメッセージの個数
+    ph->message_num = argc-1;
+
+    // 送るメッセージの形式
+    if(strcmp(argv[1] , "-hide") == 0){
+        strcpy(ph->message_type , Hide);
+    }else{
+        if(strchr(argv[1] , '-')){
+            strcpy(ph->message_type , None);
+        }else{
+            fprintf(stderr, "usage %s <-option> <message>\n", argv[0]);
+            exit(0);
+        }
+    }
 
     // 残りの領域に、メッセージを入れる
     // phは構造体型なので、charにキャスト
     // そのあとに、構造体分の大きさをインクリメントする
     char *q = ((char*)ph + sizeof(packet_header));
 
-    strcpy(q ,argv[1]);
+    for(int i=2 ; i < argc ; i++){
+        strcpy(q , argv[i]);
+        q+=strlen(argv[i]);
+    }
+
+    *q++ = '\0';
 
     n = send(socket_fd, ph, 1024, 0);
     if (n < 0) {
         printf("ERROR writing to socket");
         exit(1);
     }
-
-// データを受信する
-    // char buffer[1024];
-    // memset(buffer , 0 , 1023);
-    // n = recv(socket_fd , buffer , 1023 , 0);
-    // if (n < 0) {
-    //     printf("ERROR reading from socket");
-    //     exit(1);
-    // }
-
-    // printf("Message from server: %s\n", buffer);
 
     free(p);
 
