@@ -75,15 +75,16 @@ if (connect(socket_fd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
 
    
     ph->message_id = 1; 
-    ph->length = strlen(argv[0]);
+    ph->length = strlen(argv[1]);
 
     // 残りの領域に、メッセージを入れる
     // phは構造体型なので、charにキャスト
     // そのあとに、構造体分の大きさをインクリメントする
     char *q = ((char*)ph + sizeof(packet_header));
 
-    strcpy(q ,argv[2]);
-    n = send(socket_fd, &ph, 1024, 0);
+    strcpy(q ,argv[1]);
+
+    n = send(socket_fd, ph, 1024, 0);
     if (n < 0) {
         printf("ERROR writing to socket");
         exit(1);
@@ -100,8 +101,10 @@ if (connect(socket_fd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
 
     // printf("Message from server: %s\n", buffer);
 
-    // close(socket_fd);
+    free(p);
 
-    // return 0;
+    close(socket_fd);
+
+    return 0;
 
 }

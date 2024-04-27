@@ -80,8 +80,11 @@ recv_socket_fd = accept(socket_fd, (struct sockaddr *)&cli_addr, &clilen);
 
 /* accept()を実行すると、クライアントから通信接続要求が来るまでプログラムを停止し、接続後にプログラムを再開*/
 
-char *p = NULL;
-p = malloc(1024);
+char *p = malloc(1024);
+if (p == NULL) {
+        printf("メモリの割り当てに失敗しました。\n");
+        return 1;
+    }
 
 n = recv(recv_socket_fd , p , 1024, 0);
 
@@ -99,7 +102,7 @@ printf("Message length from client: %u\n", ph->length);
 
 char *q = ((char*)ph + sizeof(packet_header));
 
-printf("%s", q);
+printf("%s\n", q);
 
 
 // // データを送信する
