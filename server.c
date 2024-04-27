@@ -96,6 +96,7 @@ printf("Message_ID from client: %u\n", ph->message_id);
 printf("Message length from client: %u\n", ph->length);
 printf("Message num from client: %u\n", ph->message_num);
 printf("Message type from client: %s\n", ph->message_type);
+
 char *q = ((char*)ph + sizeof(packet_header));
 
 if(strcmp(ph->message_type ,Hide) == 0){
