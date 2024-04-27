@@ -3,6 +3,8 @@
 
 #define Hide "hide"
 #define None "none"
+#define PORT 8000
+
 
 typedef struct {
     uint message_id;    // 16bit

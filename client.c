@@ -8,8 +8,6 @@
 #include <unistd.h>
 #include "type_h.h"
 
-#define PORT 8000
-
 
 int main(int argc , char *argv[]){
     int socket_fd , n;

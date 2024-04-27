@@ -7,7 +7,6 @@
 #include <unistd.h>
 #include "type_h.h"
 
-#define PORT 8000
 
 int main(){
     int socket_fd , recv_socket_fd;
